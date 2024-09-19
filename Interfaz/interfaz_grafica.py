@@ -6,8 +6,8 @@ from PIL import Image
 carpeta_imagenes = os.path.join(os.path.dirname(__file__), "imagenes")
 
 # Configuración de la apariencia de la interfaz gráfica
-ctk.set_appearance_mode("System")
-ctk.set_default_color_theme('blue')
+ctk.set_appearance_mode('system')
+ctk.set_default_color_theme('green')
 
 class Login(ctk.CTk):
     
@@ -21,14 +21,16 @@ class Login(ctk.CTk):
 
         # Configurar la geometría de la ventana
         self.root.geometry(f"{ancho_pantalla}x{alto_pantalla}+0+0")
-        self.root.resizable(False, False)  # Bloqueo de redimensión de ventana
+        self.root.resizable(True, True)  # Bloqueo de redimensión de ventana
+        self.root.attributes('-fullscreen', True)  # Maximiza la ventana al abrir
+
 
         # Contenido de la ventana principal
         # Carga de la imagen
         logo = ctk.CTkImage(
             light_image=Image.open(os.path.join(carpeta_imagenes, "Login.png")),
             dark_image=Image.open(os.path.join(carpeta_imagenes, "Login.png")),
-            size=(540, 420)  # Tamaño de las imágenes
+            size=(500, 300)  # Tamaño de las imágenes
         )
 
         # Etiqueta para mostrar la imagen
@@ -51,10 +53,10 @@ class Login(ctk.CTk):
         self.contrasena.pack(pady=(0, 20))  # Añadir espacio
 
         # Botón de envío
-        self.boton_ingresar = ctk.CTkButton(self.root, text="Ingresar", width=150, height=40, fg_color="blue", hover_color="darkblue")
+        self.boton_ingresar = ctk.CTkButton(self.root, text="Ingresar", width=150, height=40, fg_color="green", hover_color="darkgreen")
         self.boton_ingresar.pack(pady=10)
 
         # Bucle de ejecución
-        self.root.mainloop() 
+        self.root.mainloop()
 
 Login()
