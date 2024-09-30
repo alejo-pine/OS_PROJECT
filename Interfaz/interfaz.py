@@ -75,7 +75,7 @@ class Login:
         self.contrasena.pack(pady=(0, 20))
 
     def crear_boton_apagar(self):
-        icono_apagar = ctk.CTkImage(Image.open(os.path.join(carpeta_imagenes, "power-off.png")), size=(40, 40))
+        icono_apagar = ctk.CTkImage(Image.open(os.path.join(carpeta_imagenes, "power.png")), size=(40, 40))
         etiqueta_apagar = ctk.CTkLabel(self.root, image=icono_apagar, text="")
         etiqueta_apagar.place(relx=0.98, rely=0.95, anchor='se')
         etiqueta_apagar.bind("<Button-1>", lambda e: self.apagar())
@@ -97,7 +97,7 @@ class Escritorio:
         alto_pantalla = self.root.winfo_screenheight()
 
         # Cargar la imagen de fondo
-        imagen_fondo = Image.open(os.path.join(carpeta_imagenes, "Escritorio.webp"))
+        imagen_fondo = Image.open(os.path.join(carpeta_imagenes, "escritorio.webp"))
         imagen_fondo = imagen_fondo.resize((ancho_pantalla, alto_pantalla), Image.LANCZOS)
         self.fondo = ImageTk.PhotoImage(imagen_fondo)
 
@@ -124,16 +124,19 @@ class Escritorio:
 
         # Lista de imágenes para los labels
         iconos = [
-            ("aplicaciones.png", None),  
-            ("editor-de-texto.png", None),
-            ("calculadora.png", None),
+            ("explorador.png", None),
+            ("editor.png", None),
+            ("calculator.png", None),
             ("configuraciones.png", None),
+            ("tasks.png", None),
+            ("calendar.png", None),
+            ("musica.png", None),
         ]
 
         self.imagenes_tk = []  # Para almacenar las imágenes y evitar que el recolector de basura las elimine
 
         for nombre_imagen, accion in iconos:
-            imagen = Image.open(os.path.join(carpeta_imagenes, nombre_imagen)).resize((30, 30))
+            imagen = Image.open(os.path.join(carpeta_imagenes, nombre_imagen)).resize((40, 40))
             imagen_tk = ImageTk.PhotoImage(imagen)
             self.imagenes_tk.append(imagen_tk)
 
@@ -146,7 +149,7 @@ class Escritorio:
 
 
     def crear_reloj(self):
-        self.frame_reloj = ctk.CTkFrame(self.root, width=200, height=100, bg_color="black")
+        self.frame_reloj = ctk.CTkFrame(self.root, width=150, height=85, bg_color="black")
         self.frame_reloj.pack(side="bottom", anchor="sw", padx=10, pady=10)
 
         # Label para mostrar la hora y fecha
