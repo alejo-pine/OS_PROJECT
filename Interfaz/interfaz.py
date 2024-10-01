@@ -3,6 +3,9 @@ import customtkinter as ctk
 import os
 from PIL import Image, ImageTk
 from datetime import datetime
+import json
+import hashlib
+
 
 # Configuraciones globales para la aplicación
 
@@ -11,6 +14,10 @@ from datetime import datetime
 carpeta_principal = os.path.dirname(__file__)
 # Carpeta de imágenes
 carpeta_imagenes = os.path.join(carpeta_principal, "imagenes")
+
+#Función para codificar la contraseña
+def codificar_contrasena(contrasena):
+    return hashlib.sha256(contrasena.encode()).hexdigest()
 
 # Modo de color y tema
 ctk.set_appearance_mode("System")
@@ -79,10 +86,35 @@ class Login:
         etiqueta_apagar = ctk.CTkLabel(self.root, image=icono_apagar, text="")
         etiqueta_apagar.place(relx=0.98, rely=0.95, anchor='se')
         etiqueta_apagar.bind("<Button-1>", lambda e: self.apagar())
-
+        
+        
     def validar(self):
-        self.root.destroy()  # Cerrar ventana de login
-        Escritorio()  # Abrir la ventana de escritorio
+        # Obtener los valores ingresados por el usuario
+        usuario_ingresado = self.usuario.get()
+        contrasena_ingresada = self.contrasena.get()
+
+        # Codificar la contraseña ingresada
+        contrasena_codificada = codificar_contrasena(contrasena_ingresada)
+
+        # Cargar el archivo JSON con las credenciales
+        with open(os.path.join(carpeta_principal, 'usuarios.json'), 'r') as archivo:
+            datos_usuarios = json.load(archivo)
+
+        # Verificar si el usuario y la contraseña coinciden
+        usuario_valido = False
+        for usuario in datos_usuarios["usuarios"]:
+            if usuario["usuario"] == usuario_ingresado and usuario["contrasena"] == contrasena_codificada:
+                usuario_valido = True
+                break
+
+        if usuario_valido:
+            self.root.destroy()  # Cerrar ventana de login
+            Escritorio()  # Abrir la ventana de escritorio
+        else:
+            # Mostrar un mensaje de error si las credenciales son incorrectas
+            error_label = ctk.CTkLabel(self.root, text="Usuario o contraseña incorrectos", fg_color="red")
+            error_label.pack(pady=10)
+
 
     def apagar(self):
         self.root.destroy()  # Cerrar la aplicación
