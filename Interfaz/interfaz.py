@@ -59,6 +59,11 @@ class Login:
         self.boton_ingresar = ctk.CTkButton(self.root, text="Ingresar", width=150, height=40, fg_color="blue",
                                             hover_color="darkblue", command=self.validar)
         self.boton_ingresar.pack(pady=10)
+        
+        # Botón para crear usuario
+        self.boton_crear_usuario = ctk.CTkButton(self.root, text="Crear Usuario", width=150, height=40, fg_color="green",
+                                                hover_color="darkgreen", command=self.abrir_ventana_crear_usuario)
+        self.boton_crear_usuario.pack(pady=10)
 
         # Botón de apagar
         self.crear_boton_apagar()
@@ -115,6 +120,74 @@ class Login:
             error_label = ctk.CTkLabel(self.root, text="Usuario o contraseña incorrectos", fg_color="red")
             error_label.pack(pady=10)
 
+    def abrir_ventana_crear_usuario(self):
+        # Crear una nueva ventana para registrar usuarios
+        self.ventana_crear_usuario = ctk.CTkToplevel(self.root)
+        self.ventana_crear_usuario.title("Crear Usuario")
+        self.ventana_crear_usuario.geometry("400x400")
+
+        # Etiqueta para el usuario
+        ctk.CTkLabel(self.ventana_crear_usuario, text="Nuevo Usuario").pack(pady=(10, 0))
+        self.nuevo_usuario = ctk.CTkEntry(self.ventana_crear_usuario, width=300, height=40)
+        self.nuevo_usuario.pack(pady=(0, 10))
+
+        # Contraseña
+        ctk.CTkLabel(self.ventana_crear_usuario, text="Contraseña").pack(pady=(10, 0))
+        self.nueva_contrasena = ctk.CTkEntry(self.ventana_crear_usuario, show="*", width=300, height=40)
+        self.nueva_contrasena.pack(pady=(0, 10))
+
+        # Confirmar contraseña
+        ctk.CTkLabel(self.ventana_crear_usuario, text="Confirmar Contraseña").pack(pady=(10, 0))
+        self.confirmar_contrasena = ctk.CTkEntry(self.ventana_crear_usuario, show="*", width=300, height=40)
+        self.confirmar_contrasena.pack(pady=(0, 20))
+
+        # Botón para guardar el nuevo usuario
+        self.boton_guardar_usuario = ctk.CTkButton(self.ventana_crear_usuario, text="Guardar", width=150, height=40,
+                                                fg_color="blue", hover_color="darkblue",
+                                                command=self.guardar_nuevo_usuario)
+        self.boton_guardar_usuario.pack(pady=10)
+        
+    def guardar_nuevo_usuario(self):
+        # Obtener los datos ingresados
+        usuario = self.nuevo_usuario.get()
+        contrasena = self.nueva_contrasena.get()
+        confirmar_contrasena = self.confirmar_contrasena.get()
+
+        # Validar que las contraseñas coincidan
+        if contrasena != confirmar_contrasena:
+            error_label = ctk.CTkLabel(self.ventana_crear_usuario, text="Las contraseñas no coinciden", fg_color="red")
+            error_label.pack(pady=10)
+            return
+
+        # Codificar la contraseña
+        contrasena_codificada = codificar_contrasena(contrasena)
+
+        # Cargar los usuarios existentes del archivo JSON
+        with open(os.path.join(carpeta_principal, 'usuarios.json'), 'r+') as archivo:
+            datos_usuarios = json.load(archivo)
+
+            # Verificar que el usuario no exista ya
+            for usuario_existente in datos_usuarios["usuarios"]:
+                if usuario_existente["usuario"] == usuario:
+                    error_label = ctk.CTkLabel(self.ventana_crear_usuario, text="El usuario ya existe", fg_color="red")
+                    error_label.pack(pady=10)
+                    return
+
+            # Agregar el nuevo usuario al archivo JSON
+            nuevo_usuario = {"usuario": usuario, "contrasena": contrasena_codificada}
+            datos_usuarios["usuarios"].append(nuevo_usuario)
+
+            # Guardar los cambios en el archivo
+            archivo.seek(0)
+            json.dump(datos_usuarios, archivo, indent=4)
+            archivo.truncate()
+
+        # Mostrar un mensaje de éxito
+        exito_label = ctk.CTkLabel(self.ventana_crear_usuario, text="Usuario creado con éxito", fg_color="green")
+        exito_label.pack(pady=10)
+
+        # Cerrar la ventana de creación de usuarios
+        self.ventana_crear_usuario.after(2000, self.ventana_crear_usuario.destroy)
 
     def apagar(self):
         self.root.destroy()  # Cerrar la aplicación
