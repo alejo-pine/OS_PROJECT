@@ -5,6 +5,7 @@ from PIL import Image, ImageTk
 from datetime import datetime
 import json
 import hashlib
+import subprocess #Para manejar procesos
 
 
 # Configuraciones globales para la aplicación
@@ -14,6 +15,7 @@ import hashlib
 carpeta_principal = os.path.dirname(__file__)
 # Carpeta de imágenes
 carpeta_imagenes = os.path.join(carpeta_principal, "imagenes")
+carpeta_programas = os.path.join(carpeta_principal, "../Programas")
 
 #Función para codificar la contraseña
 def codificar_contrasena(contrasena):
@@ -192,7 +194,30 @@ class Login:
     def apagar(self):
         self.root.destroy()  # Cerrar la aplicación
 
+#Clase para agregar todas las aplicaciones
 
+class Aplicaciones:
+    
+    def __init__(self):
+        pass
+
+    def calculadora(self):
+        ruta = os.path.join(carpeta_programas, "calculadora.py")
+        subprocess.Popen(["python", ruta])
+
+    def editor_texto(self):
+        ruta = os.path.join(carpeta_programas, "editor.py")
+        subprocess.Popen(["python", ruta])
+
+    def explorador_archivos(self):
+        ruta = os.path.join(carpeta_programas, "explorador.py")
+        subprocess.Popen(["python", ruta])
+
+    # Agrega más funciones para otros programas
+
+
+   
+# Clase para la ventana de escritorio
 class Escritorio:
     def __init__(self):
         self.root = ctk.CTk()
@@ -212,6 +237,9 @@ class Escritorio:
         self.root.resizable(True, True)
         fondo_label = ctk.CTkLabel(self.root, image=self.fondo, text="")
         fondo_label.place(x=0, y=0, relwidth=1, relheight=1)
+        
+        #Crear las funciones de llamado a las aplicaciones
+        self.aplicaciones = Aplicaciones()
 
         # Crear frame para los botones
         self.crear_botones()
@@ -229,9 +257,9 @@ class Escritorio:
 
         # Lista de imágenes para los labels
         iconos = [
-            ("explorador.png", None),
-            ("editor.png", None),
-            ("calculator.png", None),
+            ("explorador.png", self.aplicaciones.explorador_archivos),
+            ("editor.png", self.aplicaciones.editor_texto),
+            ("calculator.png", self.aplicaciones.calculadora),
             ("configuraciones.png", None),
             ("tasks.png", None),
             ("calendar.png", None),
@@ -245,13 +273,12 @@ class Escritorio:
             imagen_tk = ImageTk.PhotoImage(imagen)
             self.imagenes_tk.append(imagen_tk)
 
-            # Crear un Label en lugar de un Button
             etiqueta = ctk.CTkLabel(self.frame_botones, image=imagen_tk, text='')
             etiqueta.pack(side="top", anchor="nw", padx=10, pady=10)  # Organizar los labels verticalmente desde la esquina superior izquierda
             
             # Asociar la acción a cada label con el evento de clic
-            #etiqueta.bind("<Button-1>", lambda e, accion=accion: accion())
-
+            etiqueta.bind("<Button-1>", lambda e, accion=accion: accion())
+            
 
     def crear_reloj(self):
         self.frame_reloj = ctk.CTkFrame(self.root, width=150, height=85, bg_color="black")
