@@ -1,5 +1,4 @@
 import sys
-
 from PyQt5.QtWidgets import QApplication, QFileSystemModel, QTreeView, QVBoxLayout, QWidget
 
 class ExploradorArchivos(QWidget):
@@ -9,7 +8,7 @@ class ExploradorArchivos(QWidget):
         self.inicializarGui()
     
     def inicializarGui(self):
-        self.setWindowTitle('Explorador Archivos')
+        self.setWindowTitle('Explorador de archivos')
         self.setFixedSize(600, 600)
 
         self.modelo = QFileSystemModel()

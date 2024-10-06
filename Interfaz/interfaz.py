@@ -212,6 +212,10 @@ class Aplicaciones:
     def explorador_archivos(self):
         ruta = os.path.join(carpeta_programas, "explorador.py")
         subprocess.Popen(["python", ruta])
+        
+    def reproductor_musica(self):
+        ruta = os.path.join(carpeta_programas, "reproductor.py")
+        subprocess.Popen(["python", ruta])
 
     # Agrega más funciones para otros programas
 
@@ -263,7 +267,7 @@ class Escritorio:
             ("configuraciones.png", None),
             ("tasks.png", None),
             ("calendar.png", None),
-            ("musica.png", None),
+            ("musica.png", self.aplicaciones.reproductor_musica),
         ]
 
         self.imagenes_tk = []  # Para almacenar las imágenes y evitar que el recolector de basura las elimine
