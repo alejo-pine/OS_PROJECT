@@ -220,6 +220,10 @@ class Aplicaciones:
     def calendario(self):
         ruta = os.path.join(carpeta_programas, "calendario.py")
         subprocess.Popen(["python", ruta])
+        
+    def procesos(self):
+        ruta = os.path.join(carpeta_programas, "procesos.py")
+        subprocess.Popen(["python", ruta])
 
 
    
@@ -264,12 +268,12 @@ class Escritorio:
         # Lista de imágenes para los labels
         iconos = [
             ("explorador.png", self.aplicaciones.explorador_archivos),
-            ("editor.png", self.aplicaciones.editor_texto),
+            ("editor.png", None),
             ("calculator.png", self.aplicaciones.calculadora),
-            ("configuraciones.png", None),
-            ("tasks.png", None),
+            ("tasks.png", self.aplicaciones.procesos),
             ("calendar.png", self.aplicaciones.calendario),
             ("musica.png", self.aplicaciones.reproductor_musica),
+            ("configuraciones.png", None),
         ]
 
         self.imagenes_tk = []  # Para almacenar las imágenes y evitar que el recolector de basura las elimine
