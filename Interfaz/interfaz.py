@@ -216,8 +216,10 @@ class Aplicaciones:
     def reproductor_musica(self):
         ruta = os.path.join(carpeta_programas, "reproductor.py")
         subprocess.Popen(["python", ruta])
-
-    # Agrega más funciones para otros programas
+        
+    def calendario(self):
+        ruta = os.path.join(carpeta_programas, "calendario.py")
+        subprocess.Popen(["python", ruta])
 
 
    
@@ -266,7 +268,7 @@ class Escritorio:
             ("calculator.png", self.aplicaciones.calculadora),
             ("configuraciones.png", None),
             ("tasks.png", None),
-            ("calendar.png", None),
+            ("calendar.png", self.aplicaciones.calendario),
             ("musica.png", self.aplicaciones.reproductor_musica),
         ]
 
