@@ -199,11 +199,12 @@ class Login:
 class Aplicaciones:
     
     def __init__(self):
-        pass
+        self.running_apps = []
 
     def calculadora(self):
         ruta = os.path.join(carpeta_programas, "calculadora.py")
-        subprocess.Popen(["python", ruta])
+        proceso = subprocess.Popen(["python", ruta])
+        self.running_apps.append({'name': 'Calculadora', 'process': proceso})
 
     def editor_texto(self):
         ruta = os.path.join(carpeta_programas, "editor.py")
@@ -224,7 +225,46 @@ class Aplicaciones:
     def procesos(self):
         ruta = os.path.join(carpeta_programas, "procesos.py")
         subprocess.Popen(["python", ruta])
+        
+    def admin_tareas(self):
+        AdministradorTareas(self.running_apps)
 
+#Administrador de tareas
+class AdministradorTareas:
+    def __init__(self, running_apps):
+        self.running_apps = running_apps
+        self.root = ctk.CTk()
+        self.root.title("Administrador de Tareas")
+
+        self.table = ctk.CTkScrollableFrame(self.root)
+        self.table.pack(pady=10, padx=10, fill="both", expand=True)
+
+        self.update_table()
+        self.root.mainloop()
+
+    def update_table(self):
+        # Limpiar la tabla existente
+        for widget in self.table.winfo_children():
+            widget.destroy()
+
+        # Actualizar la tabla con los procesos en ejecución
+        for app in self.running_apps:
+            frame = ctk.CTkFrame(self.table)
+            frame.pack(pady=5)
+
+            nombre_label = ctk.CTkLabel(frame, text=app['name'])
+            nombre_label.pack(side="left")
+
+            estado_label = ctk.CTkLabel(frame, text="En ejecución")
+            estado_label.pack(side="left", padx=10)
+
+            btn_terminar = ctk.CTkButton(frame, text="Terminar", command=lambda p=app: self.terminar_proceso(p))
+            btn_terminar.pack(side="right")
+
+    def terminar_proceso(self, app):
+        app['process'].terminate()  # Terminar el proceso
+        self.running_apps.remove(app)  # Eliminar de la lista
+        self.update_table()  # Actualizar la tabla
 
    
 # Clase para la ventana de escritorio
@@ -268,12 +308,13 @@ class Escritorio:
         # Lista de imágenes para los labels
         iconos = [
             ("explorador.png", self.aplicaciones.explorador_archivos),
-            ("editor.png", None),
+            ("navegador.png", None),
+            ("text.png", self.aplicaciones.editor_texto),
             ("calculator.png", self.aplicaciones.calculadora),
-            ("tasks.png", self.aplicaciones.procesos),
+            ("tasks.png", self.aplicaciones.admin_tareas),
             ("calendar.png", self.aplicaciones.calendario),
             ("musica.png", self.aplicaciones.reproductor_musica),
-            ("configuraciones.png", None),
+            ("configuraciones.png", self.aplicaciones.procesos),
         ]
 
         self.imagenes_tk = []  # Para almacenar las imágenes y evitar que el recolector de basura las elimine
