@@ -208,23 +208,33 @@ class Aplicaciones:
 
     def editor_texto(self):
         ruta = os.path.join(carpeta_programas, "editor.py")
-        subprocess.Popen(["python", ruta])
-
+        proceso = subprocess.Popen(["python", ruta])
+        self.running_apps.append({'name': 'Editor', 'process': proceso})
+        
     def explorador_archivos(self):
         ruta = os.path.join(carpeta_programas, "explorador.py")
-        subprocess.Popen(["python", ruta])
-        
+        proceso = subprocess.Popen(["python", ruta])
+        self.running_apps.append({'name': 'Explorador', 'process': proceso})
+            
     def reproductor_musica(self):
         ruta = os.path.join(carpeta_programas, "reproductor.py")
-        subprocess.Popen(["python", ruta])
+        proceso = subprocess.Popen(["python", ruta])
+        self.running_apps.append({'name': 'Reproductor', 'process': proceso})
         
+    def navegador(self):
+        ruta = os.path.join(carpeta_programas, "navegador.py")
+        proceso = subprocess.Popen(["python", ruta])
+        self.running_apps.append({'name': 'Navegador', 'process': proceso})
+             
     def calendario(self):
         ruta = os.path.join(carpeta_programas, "calendario.py")
-        subprocess.Popen(["python", ruta])
+        proceso = subprocess.Popen(["python", ruta])
+        self.running_apps.append({'name': 'Calendario', 'process': proceso})
         
-    def procesos(self):
-        ruta = os.path.join(carpeta_programas, "procesos.py")
-        subprocess.Popen(["python", ruta])
+    def informacion(self):
+        ruta = os.path.join(carpeta_programas, "informacion.py")
+        proceso = subprocess.Popen(["python", ruta])
+        self.running_apps.append({'name': 'Info', 'process': proceso})
         
     def admin_tareas(self):
         AdministradorTareas(self.running_apps)
@@ -235,6 +245,7 @@ class AdministradorTareas:
         self.running_apps = running_apps
         self.root = ctk.CTk()
         self.root.title("Administrador de Tareas")
+        self.root.geometry("400x200")
 
         self.table = ctk.CTkScrollableFrame(self.root)
         self.table.pack(pady=10, padx=10, fill="both", expand=True)
@@ -308,13 +319,14 @@ class Escritorio:
         # Lista de imágenes para los labels
         iconos = [
             ("explorador.png", self.aplicaciones.explorador_archivos),
-            ("navegador.png", None),
+            ("navegador.png", self.aplicaciones.navegador),
             ("text.png", self.aplicaciones.editor_texto),
             ("calculator.png", self.aplicaciones.calculadora),
             ("tasks.png", self.aplicaciones.admin_tareas),
             ("calendar.png", self.aplicaciones.calendario),
             ("musica.png", self.aplicaciones.reproductor_musica),
-            ("configuraciones.png", self.aplicaciones.procesos),
+            ("informacion.png", self.aplicaciones.informacion),
+            ("configuraciones.png", None),
         ]
 
         self.imagenes_tk = []  # Para almacenar las imágenes y evitar que el recolector de basura las elimine
