@@ -16,6 +16,7 @@ carpeta_principal = os.path.dirname(__file__)
 # Carpeta de imágenes
 carpeta_imagenes = os.path.join(carpeta_principal, "imagenes")
 carpeta_programas = os.path.join(carpeta_principal, "../Programas")
+BASE_PATH = "C:/HermesOS/Usuarios"
 
 #Función para codificar la contraseña
 def codificar_contrasena(contrasena):
@@ -45,9 +46,9 @@ class Login:
 
         # Cargar la imagen del logo
         logo = ctk.CTkImage(
-            light_image=Image.open(os.path.join(carpeta_imagenes, "Login.png")),
-            dark_image=Image.open(os.path.join(carpeta_imagenes, "Login.png")),
-            size=(500, 300)
+            light_image=Image.open(os.path.join(carpeta_imagenes, "usuario.png")),
+            dark_image=Image.open(os.path.join(carpeta_imagenes, "usuario.png")),
+            size=(250, 250)
         )
 
         # Etiqueta para mostrar el logo
@@ -109,14 +110,17 @@ class Login:
 
         # Verificar si el usuario y la contraseña coinciden
         usuario_valido = False
+        ruta_usuario = None
+        
         for usuario in datos_usuarios["usuarios"]:
             if usuario["usuario"] == usuario_ingresado and usuario["contrasena"] == contrasena_codificada:
                 usuario_valido = True
+                ruta_usuario = usuario["ruta"]  # Obtener la ruta directamente del JSON
                 break
 
         if usuario_valido:
             self.root.destroy()  # Cerrar ventana de login
-            Escritorio()  # Abrir la ventana de escritorio
+            Escritorio(ruta_usuario)  # Abrir la ventana de escritorio
         else:
             # Mostrar un mensaje de error si las credenciales son incorrectas
             error_label = ctk.CTkLabel(self.root, text="Usuario o contraseña incorrectos", fg_color="red")
@@ -149,6 +153,18 @@ class Login:
                                                 command=self.guardar_nuevo_usuario)
         self.boton_guardar_usuario.pack(pady=10)
         
+    def crear_estructura_usuario(self, username):
+        # Ruta específica para el usuario
+        user_path = os.path.join(BASE_PATH, username)
+        os.makedirs(user_path, exist_ok=True)
+        
+        # Crea carpetas de Documentos, Música, Imágenes y Videos
+        subcarpetas = ["Documentos", "Musica", "Imagenes", "Videos"]
+        for carpeta in subcarpetas:
+            os.makedirs(os.path.join(user_path, carpeta), exist_ok=True)
+        
+        return os.path.normpath(user_path)  # Devolvemos la ruta del usuario para almacenarla en el archivo JSON
+        
     def guardar_nuevo_usuario(self):
         # Obtener los datos ingresados
         usuario = self.nuevo_usuario.get()
@@ -174,9 +190,16 @@ class Login:
                     error_label = ctk.CTkLabel(self.ventana_crear_usuario, text="El usuario ya existe", fg_color="red")
                     error_label.pack(pady=10)
                     return
+                
+            # Crea la estructura de carpetas para el nuevo usuario y obtener su ruta
+            ruta_usuario = self.crear_estructura_usuario(usuario)
 
             # Agregar el nuevo usuario al archivo JSON
-            nuevo_usuario = {"usuario": usuario, "contrasena": contrasena_codificada}
+            nuevo_usuario = {
+                "usuario": usuario,
+                "contrasena": contrasena_codificada,
+                "ruta": ruta_usuario  # Agregar la ruta de la carpeta del usuario
+            }
             datos_usuarios["usuarios"].append(nuevo_usuario)
 
             # Guardar los cambios en el archivo
@@ -198,8 +221,9 @@ class Login:
 
 class Aplicaciones:
     
-    def __init__(self):
+    def __init__(self, ruta_usuario):
         self.running_apps = []
+        self.ruta_usuario = ruta_usuario
 
     def calculadora(self):
         ruta = os.path.join(carpeta_programas, "calculadora.py")
@@ -213,7 +237,7 @@ class Aplicaciones:
         
     def explorador_archivos(self):
         ruta = os.path.join(carpeta_programas, "explorador.py")
-        proceso = subprocess.Popen(["python", ruta])
+        proceso = subprocess.Popen(["python", ruta, self.ruta_usuario])
         self.running_apps.append({'name': 'Explorador', 'process': proceso})
             
     def reproductor_musica(self):
@@ -238,6 +262,9 @@ class Aplicaciones:
         
     def admin_tareas(self):
         AdministradorTareas(self.running_apps)
+        
+    def getRunning_apps(self):
+        return self.running_apps
 
 #Administrador de tareas
 class AdministradorTareas:
@@ -247,40 +274,72 @@ class AdministradorTareas:
         self.root.title("Administrador de Tareas")
         self.root.geometry("400x200")
 
+        # Diccionario para mantener referencias a los widgets
+        self.app_widgets = {}
+
         self.table = ctk.CTkScrollableFrame(self.root)
         self.table.pack(pady=10, padx=10, fill="both", expand=True)
 
-        self.update_table()
+        self.update_table()  # Llama a la primera actualización
         self.root.mainloop()
 
     def update_table(self):
-        # Limpiar la tabla existente
-        for widget in self.table.winfo_children():
-            widget.destroy()
+        self.remove_closed_processes()
 
-        # Actualizar la tabla con los procesos en ejecución
+        # Iterar sobre las aplicaciones en ejecución
         for app in self.running_apps:
-            frame = ctk.CTkFrame(self.table)
-            frame.pack(pady=5)
+            if app['name'] not in self.app_widgets:
+                # Si la aplicación no está en los widgets, agregarla
+                frame = ctk.CTkFrame(self.table)
+                frame.pack(pady=5)
 
-            nombre_label = ctk.CTkLabel(frame, text=app['name'])
-            nombre_label.pack(side="left")
+                nombre_label = ctk.CTkLabel(frame, text=app['name'])
+                nombre_label.pack(side="left")
 
-            estado_label = ctk.CTkLabel(frame, text="En ejecución")
-            estado_label.pack(side="left", padx=10)
+                estado_label = ctk.CTkLabel(frame, text="En ejecución")
+                estado_label.pack(side="left", padx=10)
 
-            btn_terminar = ctk.CTkButton(frame, text="Terminar", command=lambda p=app: self.terminar_proceso(p))
-            btn_terminar.pack(side="right")
+                btn_terminar = ctk.CTkButton(frame, text="Terminar", command=lambda p=app: self.terminar_proceso(p))
+                btn_terminar.pack(side="right")
+
+                # Guardar referencias a los widgets en el diccionario
+                self.app_widgets[app['name']] = {
+                    'frame': frame,
+                    'estado_label': estado_label
+                }
+            else:
+                # Si la aplicación ya está en los widgets, solo actualizar el estado si es necesario
+                estado_label = self.app_widgets[app['name']]['estado_label']
+                estado_label.configure(text="En ejecución")
+
+        # Eliminar widgets de aplicaciones que ya no están en ejecución
+        self.cleanup_widgets()
+
+        # Configurar la siguiente actualización en 1000 ms (1 segundo)
+        self.root.after(1000, self.update_table)
 
     def terminar_proceso(self, app):
         app['process'].terminate()  # Terminar el proceso
         self.running_apps.remove(app)  # Eliminar de la lista
-        self.update_table()  # Actualizar la tabla
+        self.update_table()  # Actualizar la tabla inmediatamente después de terminar un proceso
+
+    def remove_closed_processes(self):
+        # Elimina los procesos que hayan terminado de la lista
+        self.running_apps = [app for app in self.running_apps if app['process'].poll() is None]
+
+    def cleanup_widgets(self):
+        # Limpiar widgets de procesos que ya no están en ejecución
+        active_apps = {app['name'] for app in self.running_apps}
+        for app_name in list(self.app_widgets.keys()):
+            if app_name not in active_apps:
+                # Eliminar el widget y borrar la referencia
+                self.app_widgets[app_name]['frame'].destroy()
+                del self.app_widgets[app_name]
 
    
 # Clase para la ventana de escritorio
-class Escritorio:
-    def __init__(self):
+class Escritorio():
+    def __init__(self, ruta_usuario):
         self.root = ctk.CTk()
         self.root.title("Escritorio")
 
@@ -299,8 +358,9 @@ class Escritorio:
         fondo_label = ctk.CTkLabel(self.root, image=self.fondo, text="")
         fondo_label.place(x=0, y=0, relwidth=1, relheight=1)
         
+        self.ruta_usuario = ruta_usuario
         #Crear las funciones de llamado a las aplicaciones
-        self.aplicaciones = Aplicaciones()
+        self.aplicaciones = Aplicaciones(self.ruta_usuario)
 
         # Crear frame para los botones
         self.crear_botones()
